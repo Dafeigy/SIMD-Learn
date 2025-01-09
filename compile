@@ -1,0 +1,99 @@
+#!/bin/bash
+# Check if the build directory exists
+if [ ! -d "build" ]; then
+    echo "build directory not found. Creating one..."
+    mkdir build || { echo "Failed to create 'build' directory."; exit 1; }
+fi
+
+# 设置项目根目录
+ROOT_DIR=$(pwd)
+
+# 帮助信息
+function show_help() {
+    echo "Usage: ./compile [OPTION]"
+    echo "Options:"
+    echo "  --so       Compile ./src/matrix_multiply.c to a shared library (.so)"
+    echo "  --test     Compile ./src/main.c using CMake to an executable"
+    echo "  --all      Compile both the executable and the shared library"
+    echo "  --help     Show this help message"
+    exit 0
+}
+
+# 检查参数
+if [ $# -eq 0 ]; then
+    show_help
+fi
+
+# 解析参数
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --so)
+            # 编译 matrix_multiply.c 为 .so 文件
+            echo "Compiling matrix_multiply.c to a shared library (.so)..."
+            cd $ROOT_DIR/src
+            gcc -shared -fPIC -mavx -O2 -o ../build/libmatrix.so matrix_multiply.c
+            # 检查是否成功生成 .so 文件
+            if [ -f "../build/libmatrix.so" ]; then
+                echo "Shared library './build/libmatrix.so' created successfully."
+            else
+                echo "Failed to create shared library 'libmatrix.so'."
+                exit 1
+            fi
+            exit 0
+            ;;
+        --test)
+            # 编译 main.c 为可执行程序
+            echo "Compiling main.c to an executable using CMake..."
+            cd $ROOT_DIR
+            mkdir -p build
+            cd build
+            cmake ..
+            make
+            # 检查是否成功生成可执行文件
+            if [ -f "simdtest" ]; then
+                echo "Executable 'simdtest' created successfully."
+            else
+                echo "Failed to create executable 'my_program'."
+                exit 1
+            fi
+            exit 0
+            ;;
+        --all)
+            # 编译 main.c 为可执行程序
+            echo "Compiling main.c to an executable using CMake..."
+            cd $ROOT_DIR
+            mkdir -p build
+            cd build
+            cmake ..
+            make
+            # 检查是否成功生成可执行文件
+            if [ -f "simdtest" ]; then
+                echo "Executable 'simdtest' created successfully."
+            else
+                echo "Failed to create executable 'simdtest'."
+                exit 1
+            fi
+
+            # 编译 matrix_multiply.c 为 .so 文件
+            echo "Compiling matrix_multiply.c to a shared library (.so)..."
+            cd $ROOT_DIR/src
+            gcc -shared -fPIC -mavx -O2 -o ./build/libmatrix.so ./src/matrix_multiply.c
+            # 检查是否成功生成 .so 文件
+            if [ -f "libmatrix_multiply.so" ]; then
+                echo "Shared library './build/libmatrix.so' created successfully."
+            else
+                echo "Failed to create shared library './build/libmatrix.so'."
+                exit 1
+            fi
+            exit 0
+            ;;
+        --help)
+            show_help
+            ;;
+        *)
+            echo "Unknown option: $1"
+            show_help
+            ;;
+    esac
+    shift
+done
