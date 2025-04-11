@@ -3,6 +3,10 @@ project(SIMD-test C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(simdtest src/main.c)
+# add_executable(simdtest src/main.c)
 
-target_compile_options(simdtest PRIVATE -mavx2)
+# target_compile_options(simdtest PRIVATE -mavx2)
+
+
+add_executable(oaitest oai-test.c)
+target_compile_options(oaitest PRIVATE -mavx2)

@@ -1,0 +1,5 @@
+for (i=0; i< 624; i ++){
+    ls_estimated_r[i] = generated_real[i] * received_real[i] + generated_imag[i] * received_imag[i];
+    ls_estimated_i[i] = generated_real[i] * received_imag[i] - generated_imag[i] * received_real[i];
+}
+
